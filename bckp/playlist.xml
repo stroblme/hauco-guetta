@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Item>
+  <Added>07/28/2021 13:47:16</Added>
+  <LockData>false</LockData>
+  <LocalTitle>Grillen</LocalTitle>
+  <RunningTime>56</RunningTime>
+  <Genres>
+    <Genre>Dub</Genre>
+  </Genres>
+  <Studios>
+    <Studio>Downbeat Records</Studio>
+    <Studio>BMG Rights Management</Studio>
+    <Studio>Roche Musique</Studio>
+    <Studio>Asylum Records UK</Studio>
+  </Studios>
+  <PlaylistItems>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/Seeed/Tide Is High/Seeed - Tide is Hight.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/Seeed/BAM BAM/01 Seeed - Ticket.flac</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/Seeed/Bravo Hits 81/2-14 Seeed - Deine Zeit.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/01 We Ain't Feeling Time.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/02 Skyline.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/03 Better Give U Up.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/04 Go Back Home.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/06 Canggu.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/07 Blessed.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/08 Die With a Smile.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/09 Lying Together (Interlude).mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/10 Lying Together.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/FKJ/French Kiwi Juice/12 Why Are There Boundaries.mp3</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/Ed Sheeran/÷ (Deluxe)/02 Castle on the Hill.flac</Path>
+    </PlaylistItem>
+    <PlaylistItem>
+      <Path>/media/veracrypt1/music/Ed Sheeran/÷ (Deluxe)/06 Galway Girl.flac</Path>
+    </PlaylistItem>
+  </PlaylistItems>
+  <Shares>
+    <Share>
+      <UserId>8771146c899f448c9578277bfc384da4</UserId>
+      <CanEdit>true</CanEdit>
+    </Share>
+  </Shares>
+  <PlaylistMediaType>Audio</PlaylistMediaType>
+</Item>
