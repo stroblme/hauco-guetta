@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 from lxml import etree as et
 import xml.dom.minidom as minidom
+import eyed3
 
 jellyfinPlaylistDir=Path("/media/stroblme/hauco/jellyfin/data/playlists")
 # jellyfinPlaylistDir="/media/stroblme/hauco/guetta"
@@ -64,6 +65,29 @@ def jellyfinPlaylistSync():
         # jellyfinPlaylist.write(match[0], pretty_print=True)
 
 def mobilePlaylistSync():
+    allPlaylistSongs = []
+    allCurrentSongs = []
+
+    # -- Metadata backsync
+
+    songs = glob.glob(f"{mobileDir.absolute().as_posix()}/**/*.mp3")
+
+    for song in songs:
+        allCurrentSongs.append(song)
+        
+        syncMetadata = eyed3.load(song)
+        songName = song.replace(mobileDir.absolute().as_posix()+"/","")
+        origPath = Path(musicDir.absolute().as_posix()+"/"+songName)
+        origMetadata = eyed3.load(origPath)
+
+        origMetadata.tag = syncMetadata.tag
+        syncMetadata.tag.popularities.get('rating')
+        syncMetadata.save()
+        # origMetadata.tag.playCount = syncMetadata.tag.playCount
+        # origMetadata.tag.popularities.set('rating', syncMetadata.tag.popularities.get('rating'))
+
+    print("")
+
     for playlist in playlistDir.glob("*.m3u"):
         name = playlist.stem
 
@@ -77,7 +101,10 @@ def mobilePlaylistSync():
             songs = f.readlines()
 
         print(f"Found {len(songs)} songs in the m3u playlist")
+
         
+        
+        # -- Data
 
         for song in songs:
             songPath = song.replace("\n","")
@@ -100,11 +127,17 @@ def mobilePlaylistSync():
                     print(e)
                     continue
 
+            allPlaylistSongs.append(f"{mobileDir.absolute().as_posix()}/{songName}")
+
+        # -- Playlist
+
         syncPlaylist = playlist.absolute().as_posix().replace(playlistDir.absolute().as_posix(), mobileDir.absolute().as_posix())
         with open(syncPlaylist, 'w+') as f:
             for song in songs:
                 songRemap = song.replace(musicDir.absolute().as_posix(), ".")
                 f.write(songRemap)
+
+
 
 # jellyfinPlaylistSync()
 mobilePlaylistSync()
