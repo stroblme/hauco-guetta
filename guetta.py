@@ -74,7 +74,7 @@ def mobilePlaylistSync():
 
     for song in songs:
         allCurrentSongs.append(song)
-        
+
         syncMetadata = eyed3.load(song)
         songName = song.replace(mobileDir.absolute().as_posix()+"/","")
         origPath = Path(musicDir.absolute().as_posix()+"/"+songName)
@@ -102,8 +102,6 @@ def mobilePlaylistSync():
 
         print(f"Found {len(songs)} songs in the m3u playlist")
 
-        
-        
         # -- Data
 
         for song in songs:
@@ -137,7 +135,19 @@ def mobilePlaylistSync():
                 songRemap = song.replace(musicDir.absolute().as_posix(), ".")
                 f.write(songRemap)
 
+    # -- Cleanup
 
+    for song in allCurrentSongs:
+        if song not in allPlaylistSongs:
+            print(f"Deleting {song} because not found in Playlist songs")
+
+    def remove_empty_folders(path_abs):
+        walk = list(os.walk(path_abs))
+        for path, _, _ in walk[::-1]:
+            if len(os.listdir(path)) == 0:
+                os.remove(path)
+
+    remove_empty_folders(mobileDir.absolute().as_posix())
 
 # jellyfinPlaylistSync()
 mobilePlaylistSync()
