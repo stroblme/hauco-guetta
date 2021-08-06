@@ -64,27 +64,47 @@ def jellyfinPlaylistSync():
             print(f"Cannot write to file {match[0]}")
         # jellyfinPlaylist.write(match[0], pretty_print=True)
 
+def extRemap(filePath, newExt='.mp3'):
+    pre, ext = os.path.splitext(filePath)
+    fileRemap = filePath.replace(ext, newExt)
+
+    return fileRemap
+
 def mobilePlaylistSync():
     allPlaylistSongs = []
     allCurrentSongs = []
 
     # -- Metadata backsync
 
-    songs = glob.glob(f"{mobileDir.absolute().as_posix()}/**/*.mp3")
+    songs = mobileDir.rglob("*.mp3")
 
-    for song in songs:
+    for songPath in songs:
+        song = songPath.absolute().as_posix()
         allCurrentSongs.append(song)
 
         syncMetadata = eyed3.load(song)
         songName = song.replace(mobileDir.absolute().as_posix()+"/","")
-        origPath = Path(musicDir.absolute().as_posix()+"/"+songName)
-        origMetadata = eyed3.load(origPath)
-
+        #search because we don't know if we did a conversion. sort by size
+        searchOrigPath = sorted(glob.glob(musicDir.absolute().as_posix()+"/"+songName.replace('.mp3','.*')), key=os.path.getsize)
+        origPath = ''
+        try:
+            for p in searchOrigPath:
+                #todo:load by id3 path here for flac mp3 conv
+                origMetadata = eyed3.load(Path(searchOrigPath[0]))
+                if origMetadata != None:
+                    origPath = Path(searchOrigPath[0])
+                    break
+        except Exception as e:
+            print(e)
+            continue
+        
+        if origMetadata == None:
+            continue
         origMetadata.tag = syncMetadata.tag
-        syncMetadata.tag.popularities.get('rating')
-        syncMetadata.save()
-        # origMetadata.tag.playCount = syncMetadata.tag.playCount
-        # origMetadata.tag.popularities.set('rating', syncMetadata.tag.popularities.get('rating'))
+        
+        if syncMetadata.tag.play_count != None:
+            print(origMetadata.tag.play_count)
+        # syncMetadata.save()
 
     print("")
 
@@ -119,8 +139,9 @@ def mobilePlaylistSync():
                     continue
             else:
                 try:
+                    songNameOut = extRemap(songName)
                     # os.symlink(songPath,symlinkDir.absolute().as_posix()+"/"+songName)
-                    subprocess.run(f'/usr/bin/ffmpeg -i "{songPath}" -ar 44100 -b:a 320000 -ac 2 -n "{mobileDir.absolute().as_posix()}/{songName}"', shell=True, check=True)
+                    subprocess.run(f'/usr/bin/ffmpeg -i "{songPath}" -ar 44100 -b:a 320000 -ac 2 -n "{mobileDir.absolute().as_posix()}/{songNameOut}"', shell=True, check=True)
                 except subprocess.CalledProcessError as e:
                     print(e)
                     continue
@@ -132,7 +153,9 @@ def mobilePlaylistSync():
         syncPlaylist = playlist.absolute().as_posix().replace(playlistDir.absolute().as_posix(), mobileDir.absolute().as_posix())
         with open(syncPlaylist, 'w+') as f:
             for song in songs:
+                song = extRemap(song)
                 songRemap = song.replace(musicDir.absolute().as_posix(), ".")
+
                 f.write(songRemap)
 
     # -- Cleanup
@@ -140,6 +163,7 @@ def mobilePlaylistSync():
     for song in allCurrentSongs:
         if song not in allPlaylistSongs:
             print(f"Deleting {song} because not found in Playlist songs")
+            subprocess.run(f'rm "{song}"')
 
     def remove_empty_folders(path_abs):
         walk = list(os.walk(path_abs))
