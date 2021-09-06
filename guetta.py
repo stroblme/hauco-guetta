@@ -76,35 +76,37 @@ def mobilePlaylistSync():
 
     # -- Metadata backsync
 
-    songs = mobileDir.rglob("*.mp3")
+    # songs = mobileDir.rglob("*.mp3")
 
-    for songPath in songs:
-        song = songPath.absolute().as_posix()
-        allCurrentSongs.append(song)
+    # for songPath in songs:
+    #     song = songPath.absolute().as_posix()
+    #     allCurrentSongs.append(song)
 
-        syncMetadata = eyed3.load(song)
-        songName = song.replace(mobileDir.absolute().as_posix()+"/","")
-        #search because we don't know if we did a conversion. sort by size
-        searchOrigPath = sorted(glob.glob(musicDir.absolute().as_posix()+"/"+songName.replace('.mp3','.*')), key=os.path.getsize)
-        origPath = ''
-        try:
-            for p in searchOrigPath:
-                #todo:load by id3 path here for flac mp3 conv
-                origMetadata = eyed3.load(Path(searchOrigPath[0]))
-                if origMetadata != None:
-                    origPath = Path(searchOrigPath[0])
-                    break
-        except Exception as e:
-            print(e)
-            continue
+    #     syncMetadata = eyed3.load(song)
+    #     songName = song.replace(mobileDir.absolute().as_posix()+"/","")
+    #     #search because we don't know if we did a conversion. sort by size
+    #     searchOrigPath = sorted(glob.glob(musicDir.absolute().as_posix()+"/"+songName.replace('.mp3','.*')), key=os.path.getsize)
+    #     origPath = ''
+    #     origMetadata = None
+
+    #     try:
+    #         for p in searchOrigPath:
+    #             #todo:load by id3 path here for flac mp3 conv
+    #             origMetadata = eyed3.load(Path(searchOrigPath[0]))
+    #             if origMetadata != None:
+    #                 origPath = Path(searchOrigPath[0])
+    #                 break
+    #     except Exception as e:
+    #         print(e)
+    #         continue
         
-        if origMetadata == None:
-            continue
-        origMetadata.tag = syncMetadata.tag
+    #     if origMetadata == None:
+    #         continue
+    #     origMetadata.tag = syncMetadata.tag
         
-        if syncMetadata.tag.play_count != None:
-            print(origMetadata.tag.play_count)
-        # syncMetadata.save()
+    #     if syncMetadata.tag.play_count != None:
+    #         print(origMetadata.tag.play_count)
+    #     # syncMetadata.save()
 
     print("")
 
@@ -131,20 +133,29 @@ def mobilePlaylistSync():
             fullPath = Path(mobileDir.absolute().as_posix()+"/"+songName)
             os.makedirs(fullPath.parent.as_posix(), exist_ok=True)
 
+            if not os.path.exists(songPath):
+                print(f"File in playlist, but does not exist on drive:\n{songPath}")
+                continue
+
             if songName.endswith(".mp3"):
-                try:
-                    subprocess.run(f'/bin/cp -u "{songPath}" "{mobileDir.absolute().as_posix()}/{songName}"', shell=True, check=True)
-                except subprocess.CalledProcessError as e:
-                    print(e)
-                    continue
+                if not os.path.exists(f"{mobileDir.absolute().as_posix()}/{songName}") and os.path.getsize(f"{mobileDir.absolute().as_posix()}/{songName}") == os.path.getsize(f"{songPath}"):
+                    # Copy only
+                    try:
+                        subprocess.run(f'/bin/cp -u "{songPath}" "{mobileDir.absolute().as_posix()}/{songName}"', shell=True, check=True)
+                    except subprocess.CalledProcessError as e:
+                        print(e)
+                        continue
             else:
-                try:
-                    songNameOut = extRemap(songName)
-                    # os.symlink(songPath,symlinkDir.absolute().as_posix()+"/"+songName)
-                    subprocess.run(f'/usr/bin/ffmpeg -i "{songPath}" -ar 44100 -b:a 320000 -ac 2 -n "{mobileDir.absolute().as_posix()}/{songNameOut}"', shell=True, check=True)
-                except subprocess.CalledProcessError as e:
-                    print(e)
-                    continue
+                songNameOut = extRemap(songName)
+
+                if not os.path.exists(f"{mobileDir.absolute().as_posix()}/{songNameOut}"):
+                    # Copy and convert
+                    try:
+                        # os.symlink(songPath,symlinkDir.absolute().as_posix()+"/"+songName)
+                        subprocess.run(f'/usr/bin/ffmpeg -i "{songPath}" -ar 44100 -b:a 320000 -ac 2 -n "{mobileDir.absolute().as_posix()}/{songNameOut}"', shell=True, check=True)
+                    except subprocess.CalledProcessError as e:
+                        print(e)
+                        continue
 
             allPlaylistSongs.append(f"{mobileDir.absolute().as_posix()}/{songName}")
 
@@ -154,7 +165,8 @@ def mobilePlaylistSync():
         with open(syncPlaylist, 'w+') as f:
             for song in songs:
                 song = extRemap(song)
-                songRemap = song.replace(musicDir.absolute().as_posix(), ".")
+                song = song.replace("\n", "")
+                songRemap = song.replace(musicDir.absolute().as_posix(), ".") + "\n"
 
                 f.write(songRemap)
 
@@ -169,7 +181,7 @@ def mobilePlaylistSync():
         walk = list(os.walk(path_abs))
         for path, _, _ in walk[::-1]:
             if len(os.listdir(path)) == 0:
-                os.remove(path)
+                os.rmdir(path)
 
     remove_empty_folders(mobileDir.absolute().as_posix())
 
