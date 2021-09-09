@@ -11,8 +11,9 @@ jellyfinPlaylistDir=Path("/media/stroblme/hauco/jellyfin/data/playlists")
 playlistDir=Path("/media/veracrypt1/system/playlists")
 mobileDir=Path("/media/veracrypt1/system/sync")
 musicDir=Path("/media/veracrypt1/music")
+ambientDir=Path("/media/veracrypt1/system/ambientMusic")
 
-def jellyfinPlaylistSync():
+def addFromM3U():
 
     for playlist in playlistDir.glob("*.m3u"):
         name = playlist.stem
@@ -185,5 +186,56 @@ def mobilePlaylistSync():
 
     remove_empty_folders(mobileDir.absolute().as_posix())
 
+def addFromFolder():
+    folders = glob.glob(ambientDir.absolute().as_posix()+"/*")
+
+    for folder in folders:
+        name = folder.replace(f"{ambientDir.absolute().as_posix()}/", "")
+        match = glob.glob(jellyfinPlaylistDir.absolute().as_posix()+"/"+name+"/playlist.xml")
+        if match == []:
+            continue
+
+        print(f"Processing Playlist: {name}")
+
+        jellyfinPlaylist = et.parse(match[0])
+
+        jellyfinSongs = list()
+
+        for neighbor in jellyfinPlaylist.iter('Path'):
+            jellyfinSongs.append(neighbor.text)
+
+        print(f"Found {len(jellyfinSongs)} songs in the xml playlist")
+
+        songs=glob.glob(f"{folder}/*.mp3")
+
+        print(f"Found {len(songs)} songs in the corresponding ambient music folder")
+        
+        
+
+        playlistRoot=jellyfinPlaylist.find('PlaylistItems')
+        if playlistRoot == None:
+            itemRoot = jellyfinPlaylist.getroot()
+            playlistRoot = et.SubElement(itemRoot, 'PlaylistItems')
+        for song in songs:
+            if song in jellyfinSongs:
+                continue
+            tempItem = et.SubElement(playlistRoot,'PlaylistItem')
+            tempPath = et.SubElement(tempItem,'Path')
+            tempPath.text = song
+        
+        xmlstr = minidom.parseString(et.tostring(jellyfinPlaylist)).toprettyxml()
+        xmlstr = xmlstr.replace('\n</Path>', '</Path>')
+        xmlstr = xmlstr.replace('\t\t\t\n', '')
+        xmlstr = xmlstr.replace('\t\t\n', '')
+        xmlstr = xmlstr.replace('\t\n', '')
+
+        try:
+            
+            with open(match[0], "w") as f:
+                f.write(xmlstr)
+        except Exception as e:
+            print(f"Cannot write to file {match[0]}")
+
 # jellyfinPlaylistSync()
 mobilePlaylistSync()
+addFromFolder()
