@@ -228,6 +228,10 @@ def addFromFolder():
         xmlstr = xmlstr.replace('\t\t\t\n', '')
         xmlstr = xmlstr.replace('\t\t\n', '')
         xmlstr = xmlstr.replace('\t\n', '')
+        xmlstr = xmlstr.replace('\n  \n', '\n')
+        xmlstr = xmlstr.replace('\n    \n', '\n')
+        xmlstr = xmlstr.replace('\n      \n', '\n')
+        xmlstr = xmlstr.replace('\n\n\n\n\n', '\n')
 
         try:
             
@@ -236,6 +240,6 @@ def addFromFolder():
         except Exception as e:
             print(f"Cannot write to file {match[0]}")
 
-# jellyfinPlaylistSync()
+# addFromM3U()
 mobilePlaylistSync()
 addFromFolder()
